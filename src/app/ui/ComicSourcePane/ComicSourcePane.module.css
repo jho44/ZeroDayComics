@@ -1,0 +1,38 @@
+.sourceTable {
+  padding: 2rem;
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  column-gap: 1.5rem;
+  row-gap: 1.5rem;
+}
+
+.sourceTable .row {
+  display: contents;
+}
+
+.sourceTable .row * {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sourceTable input {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  width: 100%;
+  background: transparent;
+  border: 1px solid #94a3b8;
+}
+
+.sourceTable input:focus {
+  outline: none;
+  border: 1px solid #e2e8f0;
+}
+
+.sourceTable button {
+  background: #e2e8f0;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  color: #1e293b;
+}

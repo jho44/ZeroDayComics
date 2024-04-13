@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import LoadingCircle from "./icons/LoadingCircle";
-import { clsx } from "clsx";
 
 export default function TranslationPane() {
   const [loading, setLoading] = useState(false);
@@ -22,7 +21,7 @@ export default function TranslationPane() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/translate", {
+      const res = await fetch("/api/translate", {
         method: "POST",
         body: latestOgText.join("\n"),
       });
