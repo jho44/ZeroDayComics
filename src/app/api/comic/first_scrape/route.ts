@@ -10,12 +10,12 @@ export async function GET(req: Request) {
     input: z.string(),
   });
 
-  const { which: comicSrc, input } = searchParamsSchema.parse(
+  const { which: comicSrc, input: comicUrl } = searchParamsSchema.parse(
     Object.fromEntries(searchParams.entries())
   );
 
-  const scraper = new scrapers[comicSrc](input);
-  await scraper.scrape(0);
+  const scraper = new scrapers[comicSrc](comicUrl);
+  const res = await scraper.firstScrape();
 
-  return Response.json({ boop: true });
+  return Response.json(res);
 }

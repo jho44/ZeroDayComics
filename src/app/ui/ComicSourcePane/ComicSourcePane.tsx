@@ -2,15 +2,21 @@ import { ComicSource, ComicSourceZ } from "@/app/lib/definitions";
 import {
   createRef,
   Dispatch,
+  MutableRefObject,
   RefObject,
   SetStateAction,
   useEffect,
   useState,
+  useContext,
 } from "react";
 import styles from "./ComicSourcePane.module.css";
+import { ComicSourceContext } from "../Contexts";
+
 type Props = {
   setLoadingComic: Dispatch<SetStateAction<boolean>>;
+  // latestRetrievedPage: MutableRefObject<number>;
 };
+
 export default function ComicSourcePane({ setLoadingComic }: Props) {
   /* Constants */
   const sources = [
@@ -21,13 +27,16 @@ export default function ComicSourcePane({ setLoadingComic }: Props) {
     },
   ];
 
+  /* Context */
+  const { latestRetrievedPage, setLatestRetrievedPage } =
+    useContext(ComicSourceContext);
+
   /* States */
   const [inputRefs, setInputRefs] = useState<RefObject<HTMLInputElement>[]>([]);
 
   /* Lifecycle Methods */
   useEffect(() => {
     // https://stackoverflow.com/questions/54633690/how-can-i-use-multiple-refs-for-an-array-of-elements-with-hooks
-    // add or remove refs
     setInputRefs((inputRefs) =>
       Array(sources.length)
         .fill(null)
@@ -40,12 +49,17 @@ export default function ComicSourcePane({ setLoadingComic }: Props) {
     const inputVal = inputRefs[i]?.current?.value;
     if (!inputVal) return; // TODO: UI error
     // setLoadingComic(true);
-    console.log(which);
+
     const urlSearchParams = new URLSearchParams({
       which,
       input: inputVal,
+      latestRetrievedPage: latestRetrievedPage.toString(),
     });
-    const res = await fetch(`/api/comic?${urlSearchParams.toString()}`);
+    const res = await fetch(
+      `/api/comic/first_scrape?${urlSearchParams.toString()}`
+    );
+    const { totalPages, imgs } = await res.json();
+    setLatestRetrievedPage((prev) => prev + imgs.length);
   };
 
   return (

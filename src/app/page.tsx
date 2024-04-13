@@ -5,13 +5,18 @@ import ComicSourcePane from "@/app/ui/ComicSourcePane/ComicSourcePane";
 import LoadingCircle from "@/app/ui/icons/LoadingCircle";
 import TranslationPane from "@/app/ui/TranslationPane";
 
-export default function Home() {
-  const [loadingComic, setLoadingComic] = useState(false);
-  const comicUrl = useRef("");
+import ComicSourceProvider from "./ui/providers/ComicSourceProvider";
 
+export default function Home() {
+  /* Constants */
   const leftPanePercent = 50;
   const rightPanePercent = 100 - leftPanePercent;
 
+  /* States and Refs */
+  const [loadingComic, setLoadingComic] = useState(false);
+  const [displayedPageNum, setDisplayedPageNum] = useState(0);
+
+  /* Components */
   const LeftPane = () => {
     if (loadingComic)
       return (
@@ -23,20 +28,23 @@ export default function Home() {
     if (comicUrl.current) return <ComicPane />;
     return <ComicSourcePane setLoadingComic={setLoadingComic} />;
   };
+
   return (
-    <main className="flex h-screen">
-      <div
-        className="left-pane border border-sky-500"
-        style={{ width: `${leftPanePercent}vw` }}
-      >
-        <LeftPane />
-      </div>
-      <div
-        className="right-pane border border-purple-500"
-        style={{ width: `${rightPanePercent}vw` }}
-      >
-        <TranslationPane />
-      </div>
-    </main>
+    <ComicSourceProvider>
+      <main className="flex h-screen">
+        <div
+          className="left-pane border border-sky-500"
+          style={{ width: `${leftPanePercent}vw` }}
+        >
+          <LeftPane />
+        </div>
+        <div
+          className="right-pane border border-purple-500"
+          style={{ width: `${rightPanePercent}vw` }}
+        >
+          <TranslationPane />
+        </div>
+      </main>
+    </ComicSourceProvider>
   );
 }
