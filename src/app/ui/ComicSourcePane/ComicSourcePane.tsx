@@ -2,19 +2,17 @@ import { ComicSource, ComicSourceZ } from "@/app/lib/definitions";
 import {
   createRef,
   Dispatch,
-  MutableRefObject,
   RefObject,
   SetStateAction,
+  useContext,
   useEffect,
   useState,
-  useContext,
 } from "react";
+import ComicSourceContext from "../contexts/ComicSource/context";
 import styles from "./ComicSourcePane.module.css";
-import { ComicSourceContext } from "../Contexts";
 
 type Props = {
   setLoadingComic: Dispatch<SetStateAction<boolean>>;
-  // latestRetrievedPage: MutableRefObject<number>;
 };
 
 export default function ComicSourcePane({ setLoadingComic }: Props) {
@@ -23,13 +21,12 @@ export default function ComicSourcePane({ setLoadingComic }: Props) {
     {
       label: "Pixiv Web Serial",
       id: ComicSourceZ.enum.PIXIV,
-      example: "https://comic.pixiv.net/store/variants/ngu24w1kg",
+      example: "https://comic.pixiv.net/viewer/stories/167987",
     },
   ];
 
   /* Context */
-  const { latestRetrievedPage, setLatestRetrievedPage } =
-    useContext(ComicSourceContext);
+  const { setSourceInfo } = useContext(ComicSourceContext);
 
   /* States */
   const [inputRefs, setInputRefs] = useState<RefObject<HTMLInputElement>[]>([]);
@@ -48,18 +45,25 @@ export default function ComicSourcePane({ setLoadingComic }: Props) {
   const handleSubmit = async (which: ComicSource, i: number) => {
     const inputVal = inputRefs[i]?.current?.value;
     if (!inputVal) return; // TODO: UI error
-    // setLoadingComic(true);
+    setLoadingComic(true);
 
     const urlSearchParams = new URLSearchParams({
       which,
       input: inputVal,
-      latestRetrievedPage: latestRetrievedPage.toString(),
+      nextPage: "0",
     });
     const res = await fetch(
       `/api/comic/first_scrape?${urlSearchParams.toString()}`
     );
     const { totalPages, imgs } = await res.json();
-    setLatestRetrievedPage((prev) => prev + imgs.length);
+
+    setSourceInfo({
+      type: "init",
+      totalPages,
+      imgs,
+      comicUrl: inputVal,
+    });
+    setLoadingComic(false);
   };
 
   return (
