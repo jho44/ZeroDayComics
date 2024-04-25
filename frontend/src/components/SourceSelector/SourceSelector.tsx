@@ -1,92 +1,13 @@
-import { Source, sources } from "../../lib/definitions";
-import {
-  createRef,
-  Dispatch,
-  RefObject,
-  SetStateAction,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import styles from "./SourceSelector.module.css";
+import SourceTable from "./SourceTable";
 import Upload from "./Upload";
-import { socket } from "../../socket";
 
-type Props = {
-  handleSubmitUI: () => void;
-  handleOcrStartUI: (_totalPages: number) => void;
-  handlePageDoneUI: (page: { pageNum: number; blks: string }) => void;
-  handleAllPagesDoneUI: () => void;
-};
-
-export default function SourceSelector({
-  handleSubmitUI,
-  handleOcrStartUI,
-  handlePageDoneUI,
-  handleAllPagesDoneUI,
-}: Props) {
-  /* Context */
-  // const { setSourceInfo } = useContext(ComicSourceContext);
-
-  /* States */
-  const [inputRefs, setInputRefs] = useState<RefObject<HTMLInputElement>[]>([]);
-
-  /* Lifecycle Methods */
-  useEffect(() => {
-    // https://stackoverflow.com/questions/54633690/how-can-i-use-multiple-refs-for-an-array-of-elements-with-hooks
-    setInputRefs((inputRefs) =>
-      Array(sources.length)
-        .fill(null)
-        .map((_, i) => inputRefs[i] || createRef())
-    );
-  }, []);
-
-  /* Methods */
-  const handleSubmit = async (which: Source, i: number) => {
-    const inputVal = inputRefs[i]?.current?.value;
-    if (!inputVal) return; // TODO: UI error
-    handleSubmitUI();
-
-    const onPageDone = (res: { pageNum: number; blks: string }) => {
-      handlePageDoneUI(res);
-    };
-
-    const onAllPagesDone = () => {
-      handleAllPagesDoneUI();
-      socket.off("page_done", onPageDone);
-      socket.off("all_pages_done", onAllPagesDone);
-      socket.disconnect();
-    };
-    socket.connect();
-    socket.on("page_done", onPageDone);
-    socket.on("all_pages_done", onAllPagesDone);
-    socket.emit("source_chosen", which, inputVal);
-
-    socket.on("page_done", onPageDone);
-  };
-
+export default function SourceSelector() {
   return (
-    <div className="w-full h-full">
-      <div className={styles.sourceTable}>
-        {sources.map(({ label, id, example }, i) => (
-          <div className={styles.row} key={id}>
-            <div>{label}</div>
-            <div>
-              <input type="text" placeholder={example} ref={inputRefs[i]} />
-            </div>
-            {/* document.querySelector('a[href^="/viewer"]') */}
-            <div>
-              <button onClick={() => handleSubmit(id, i)}>Enter</button>
-            </div>
-          </div>
-        ))}
-      </div>
-      <Upload
-        handleOcrStartUI={handleOcrStartUI}
-        handlePageDoneUI={handlePageDoneUI}
-        handleAllPagesDoneUI={handleAllPagesDoneUI}
-      />
+    <div className="flex flex-col justify-center items-center h-screen w-full text-center p-4">
+      <h1>Scrape a chapter from one of our supported platforms</h1>
+      <SourceTable />
+      <h1>OR</h1>
+      <Upload />
     </div>
   );
 }

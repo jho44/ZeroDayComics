@@ -1,28 +1,15 @@
-import {
-  ChangeEvent,
-  Dispatch,
-  SetStateAction,
-  useContext,
-  useState,
-} from "react";
+import { ChangeEvent, useState } from "react";
+import { useSource } from "../../contexts/Source";
 import { socket } from "../../socket";
-// import ComicSourceContext from "../contexts/ComicSource/context";
+import styles from "./SourceSelector.module.css";
 
 type FilesObj = { [key: string]: File };
-type Props = {
-  handleOcrStartUI: (_totalPages: number) => void;
-  handlePageDoneUI: (page: { pageNum: number; blks: string }) => void;
-  handleAllPagesDoneUI: () => void;
-};
 
 // https://levelup.gitconnected.com/how-to-implement-multiple-file-uploads-in-react-4cdcaadd0f6e
-export default function Upload({
-  handleOcrStartUI,
-  handlePageDoneUI,
-  handleAllPagesDoneUI,
-}: Props) {
-  /* Contexts */
-  // const { setSourceInfo } = useContext(ComicSourceContext);
+export default function Upload() {
+  /* Hooks */
+  const { handleOcrStartUI, handlePageDoneUI, handleAllPagesDoneUI } =
+    useSource();
 
   /* States */
   const [files, setFiles] = useState<FilesObj>({});
@@ -43,11 +30,6 @@ export default function Upload({
     if (!numFiles) return; // TODO: UI Error
 
     handleOcrStartUI(numFiles);
-    // // https://imagekit.io/blog/uploading-multiple-files-using-javascript/
-    // const formData = new FormData();
-    // actualFiles.forEach((f) => {
-    //   formData.append("files[]", f);
-    // });
 
     const onPageDone = (res: { pageNum: number; blks: string }) => {
       handlePageDoneUI(res);
@@ -64,18 +46,17 @@ export default function Upload({
     socket.on("page_done", onPageDone);
     socket.on("all_pages_done", onAllPagesDone);
     socket.emit("files_uploaded", actualFiles);
-
-    // setSourceInfo({
-    //   type: "init",
-    //   totalPages: actualFiles.length,
-    //   imgs: actualFiles,
-    //   ocrPages: blks,
-    // });
   };
 
   return (
-    <div>
+    <div className={`${styles.upload} flex flex-col items-center gap-6`}>
+      <label htmlFor="fileUpload" className="w-full">
+        <div className="border-2 border-dashed border-sky-500 cursor-pointer w-full max-w-[700px] flex justify-center items-center h-[200px] rounded-2xl">
+          Click to upload manga image files
+        </div>
+      </label>
       <input
+        className="hidden"
         id="fileUpload"
         type="file"
         multiple
@@ -83,16 +64,32 @@ export default function Upload({
         onChange={handleFileEvent}
       />
 
-      <button onClick={handleUpload}>Submit</button>
+      <table className="border-separate border-spacing-x-4 border-spacing-y-3">
+        <tbody className="max-h-[100px] block overflow-scroll">
+          {Object.keys(files).map((fname) => (
+            <tr key={fname} className="gap-4">
+              <td className="">{fname} </td>
+              <td>
+                <button
+                  onClick={() => {
+                    setFiles((_files) => {
+                      const newFiles = { ..._files };
+                      delete newFiles[fname];
+                      return newFiles;
+                    });
+                  }}
+                >
+                  ❌
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
-      <div>
-        {Object.keys(files).map((fname) => (
-          <div key={fname}>{fname}</div>
-        ))}
-        {
-          // TODO: implement way to delete chosen files
-        }
-      </div>
+      <button id={styles["upload-submit-btn"]} onClick={handleUpload}>
+        Submit
+      </button>
     </div>
   );
 }

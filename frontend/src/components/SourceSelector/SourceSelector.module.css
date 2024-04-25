@@ -1,20 +1,13 @@
-.sourceTable {
-  padding: 2rem;
+.sourceTable, .upload {
+  padding: 2rem 1rem;
   width: 100%;
+  max-width: 700px;
+}
+
+.sourceTable {
   display: grid;
-  grid-template-columns: auto 1fr auto;
   column-gap: 1.5rem;
-  row-gap: 1.5rem;
-}
-
-.sourceTable .row {
-  display: contents;
-}
-
-.sourceTable .row * {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  row-gap: 0.7rem;
 }
 
 .sourceTable input {
@@ -30,9 +23,10 @@
   border: 1px solid #e2e8f0;
 }
 
-.sourceTable button {
+.sourceTable button, #upload-submit-btn {
   background: #e2e8f0;
   padding: 0.25rem 0.75rem;
   border-radius: 0.5rem;
   color: #1e293b;
+  font-weight: 600;
 }

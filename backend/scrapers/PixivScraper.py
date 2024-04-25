@@ -54,6 +54,7 @@ class PixivScraper(Scraper):
 
     page.on("response", handle_response)
     await page.goto(self.url, wait_until='networkidle')
+    print('NETWORK IDLE')
 
     blob_urls = await self.__get_blob_urls(page)
 
@@ -62,6 +63,7 @@ class PixivScraper(Scraper):
     # honestly this bit about waiting for blobs might redundant
     # when networkidle, there should be no more blobs coming in
     while not await self.__wait_for_blobs(all_blobs_evt, 3):
+        print(awaited_blobs)
         to_delete = []
         for blob_url in awaited_blobs:
           if blob_url in blob_responses:
@@ -69,7 +71,7 @@ class PixivScraper(Scraper):
         
         for blob_url in to_delete:
           awaited_blobs.remove(blob_url)
-        if len(awaited_blobs) == 0: 
+        if len(awaited_blobs) <= 1: 
           all_blobs_evt.set()
     
     buffers: list[bytes] = []
