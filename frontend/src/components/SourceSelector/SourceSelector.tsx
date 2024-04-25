@@ -48,20 +48,19 @@ export default function SourceSelector({
     if (!inputVal) return; // TODO: UI error
     handleSubmitUI();
 
-    const onOcrStarting = (totalPages: number) => {
-      console.log("done scraping -- ocr starting");
-      handleOcrStartUI(totalPages);
-      socket.off("ocr", onOcrStarting);
+    const onPageDone = (res: { pageNum: number; blks: string }) => {
+      handlePageDoneUI(res);
     };
 
-    const onPageDone = (page: { pageNum: number; blks: string }) => {
-      handlePageDoneUI(page);
+    const onAllPagesDone = () => {
+      handleAllPagesDoneUI();
       socket.off("page_done", onPageDone);
+      socket.off("all_pages_done", onAllPagesDone);
       socket.disconnect();
     };
-
     socket.connect();
-    socket.on("ocr", onOcrStarting);
+    socket.on("page_done", onPageDone);
+    socket.on("all_pages_done", onAllPagesDone);
     socket.emit("source_chosen", which, inputVal);
 
     socket.on("page_done", onPageDone);

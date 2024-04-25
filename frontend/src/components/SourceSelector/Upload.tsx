@@ -63,10 +63,7 @@ export default function Upload({
     socket.connect();
     socket.on("page_done", onPageDone);
     socket.on("all_pages_done", onAllPagesDone);
-    socket.emit(
-      "files_uploaded",
-      actualFiles.map((file) => [file.name, file])
-    );
+    socket.emit("files_uploaded", actualFiles);
 
     // setSourceInfo({
     //   type: "init",

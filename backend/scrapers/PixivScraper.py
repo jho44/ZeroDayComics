@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import contextlib
 from typing import List, Any, Union
 # import requests
 from urllib.parse import urlparse
@@ -29,36 +30,19 @@ class PixivScraper(Scraper):
     self.url = url # https://comic.pixiv.net/viewer/stories/167987
     self.episode = urlparse(url).path.split('/')[-1]
 
-  def __get_pages_data(self):
-    url = f"https://comic.pixiv.net/api/app/episodes/{self.episode}/read_v4"
-    headers = {
-      'Content-Type': 'application/json',
-      'referer': self.url,
-      'X-Client-Hash': 'be866478176a7d309bca38164ebfb599b96074a3d7aebd0830bfcfed83a8a340',
-      'X-Client-Time': '2024-04-20T03:12:13-07:00',
-      'X-Requested-With': 'pixivcomic'
-    }
-    r = requests.get(url, headers=headers)
-    return r.json()['data']['reading_episode']['pages']
-
-  def __get_encrypted_img(self, url: str, key: str):
-    print({ url, key })
-    headers = {
-      "referer": "https://comic.pixiv.net/",
-      "X-Cobalt-Thumber-Parameter-Gridshuffle-Key": key
-    }
-    r = requests.get(url, headers=headers, stream=True)
-    r.raw.decode_content = True
-    im = Image.open(r.raw, 'r').convert('RGBA')
-
-    raw_pixels = list(im.getdata())
-    flattened = [item for sublist in raw_pixels for item in sublist]
-    return flattened
-
   async def __get_blob_urls(self, page: Page):
-    return await page.locator('div[id^="page-"]').evaluate_all(
-      '(divs) => divs.map((div) => div.style.backgroundImage.match(/url\("(.*?)"/)?.[1])'
-    )
+    try:
+      return await page.locator('div[id^="page-"]').evaluate_all(
+        '(divs) => divs.map((div) => div.style.backgroundImage.match(/url\("(.*?)"/)?.[1])'
+      )
+    except: 
+      print('SOMETHING WENT WRONG WITH GETTING BLOB URLS')
+      return []
+  async def __wait_for_blobs(self, evt, timeout):
+    # suppress TimeoutError because we'll return False in case of timeout
+    with contextlib.suppress(asyncio.TimeoutError):
+        await asyncio.wait_for(evt.wait(), timeout)
+    return evt.is_set()
 
   async def __get_raws(self, playwright: Playwright):
     browser = await playwright.chromium.launch()
@@ -70,34 +54,54 @@ class PixivScraper(Scraper):
     def handle_response(response: Response):
       url = response.url
       if url.startswith('blob'):
+        print('GOT BLOB')
         blob_responses[url] = response
 
     page.on("response", handle_response)
+    print('before goto')
     await page.goto(self.url, wait_until='networkidle')
+    print('after goto')
 
+    print('before get_blob_urls')
     blob_urls = await self.__get_blob_urls(page)
+    print('after get_blob_urls')
 
+    all_blobs_evt = asyncio.Event()
+    print('before wait_for_blobs')
+    awaited_blobs = set(blob_urls)
+    while not await self.__wait_for_blobs(all_blobs_evt, 5):
+        to_delete = []
+        for blob_url in awaited_blobs:
+          if blob_url in blob_responses:
+            to_delete.append(blob_url)
+        
+        for blob_url in to_delete:
+          awaited_blobs.remove(blob_url)
+        print(len(blob_urls), len(awaited_blobs))
+        # if len(blob_urls) == len(blob_responses):
+        if len(blob_urls) > len(awaited_blobs): 
+          all_blobs_evt.set()
+    
+    print('GOT ALL BLOBS!')
+    print('DESIRED: ', blob_urls)
+    print('GOT: ', blob_responses.keys())
     buffers: list[bytes] = []
     for page_num, blob_url in enumerate(blob_urls):
-      if not page_num or not blob_url: # skip first page since it's empty
+      if not page_num or blob_url not in blob_responses: # skip first page since it's empty
         continue
       
       response = blob_responses[blob_url]
+      print('ADDED BUFFER', blob_url)
       buffers.append(await response.body())
 
+    print('ALL BUFFERS ADDED')
     await context.close()
+    print('CLOSED CONTEXT')
     await browser.close()
+    print('CLOSED BROWSER')
     return buffers
 
-  def __try_decrypt(self):
-    pages_data = self.__get_pages_data()
-    for page in pages_data[0:1]:
-      raw_pixels = self.__get_encrypted_img(page['url'], page['key'])
-      f = open("demofile2.txt", "a")
-      f.write(','.join(str(x) for x in raw_pixels))
-      f.close()
-
-  async def first_scrape(self) -> FirstScrapeRes:
+  async def first_scrape(self):
     logger.info(f'First scrape starting for url {self.url}')
     async with async_playwright() as playwright: 
       raws = await self.__get_raws(playwright)

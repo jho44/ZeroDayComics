@@ -7,14 +7,14 @@ class MokuroAdaptor(Mokuro, Adaptor):
     super().__init__()
     self.translator = translator
 
-  def pipeline(self, args):
+  async def pipeline(self, args):
     page = self.__call__(args)
     # page: { blocks: { lines: string[] }[] }
 
     # for block in page['blocks']:
     #   block['translation'] = self.translator.translate("\n".join(block['lines']))
     lines = ["\n".join(block['lines']) for block in page['blocks']]
-    translations = self.translator.translate(lines)
+    translations = await self.translator.translate(lines)
     for block, transl in zip(page['blocks'], translations):
       block['translation'] = transl
 

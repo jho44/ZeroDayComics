@@ -57,22 +57,19 @@ class TextAndBoxDetector:
     return result
     
   def __call__(self, file):
-    [filename, filebytes] = file
     # TODO filter out files which aren't imgs
     # TODO error check imgs -- have yet to know what faulty img looks like tho
-
-    img = convert_to_img(filebytes)
+    
+    img = convert_to_img(file)
     # TOCONSIDER maybe consider whether json alr exists for this chapter?
     self.init_models()
     try:
       result = self.process_page(img)
-      # result['filename'] = file.filename
-      result['filename'] = filename
-      result['img'] = filebytes
+      result['img'] = file
     except Exception as e:
       logger.error(f'Failed OCR of file "{img}": {e}')
       return None
-    dump_json(result, 'tmp/_ocr/' + filename.split('.')[0] + '.json')
+    # dump_json(result, 'tmp/_ocr/' + filename.split('.')[0] + '.json')
     return result
     
   @staticmethod
