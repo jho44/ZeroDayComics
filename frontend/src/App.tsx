@@ -4,6 +4,7 @@ import SourceSelector from "./components/SourceSelector/SourceSelector";
 import Viewer from "./components/Viewer";
 import { SourceContext } from "./contexts/Source";
 import { OcrPage } from "./lib/definitions";
+import LoadingBar from "./components/LoadingBar";
 
 function App() {
   /* States */
@@ -27,6 +28,7 @@ function App() {
     pageNum: number;
     blks: string;
   }) => {
+    console.log({ pageNum });
     setPages((_pages) => [
       ..._pages.slice(0, pageNum),
       JSON.parse(blks),
@@ -55,21 +57,12 @@ function App() {
 
   return (
     <div className="relative">
-      {loading ? (
-        <div className="loading-bar fixed w-screen left-0 bottom-0 p-4 flex flex-col gap-3 justify-center items-center">
-          <div className="w-full max-w-[200px] h-3 bg-white rounded-sm overflow-hidden">
-            <div
-              className="bg-slate-400 h-full border-[3px] border-white"
-              style={{ width: `${(numPagesDone / pages.length) * 100}%` }}
-            />
-          </div>
-          <p>
-            {numPagesDone} / {pages.length}
-          </p>
-        </div>
-      ) : (
-        <></>
-      )}
+      <div className="loading-bar fixed w-screen left-0 bottom-0 p-4 flex flex-col gap-3 justify-center items-center">
+        {loading && pages.length > 0 && (
+          <LoadingBar numDone={numPagesDone} numToDo={pages.length} />
+        )}
+        {loading && !pages.length && <p>Retrieving pages...</p>}
+      </div>
 
       <Viewer pages={pages} />
     </div>

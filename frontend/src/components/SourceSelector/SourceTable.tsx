@@ -9,8 +9,12 @@ export default function SourceTable() {
   const [inputRefs, setInputRefs] = useState<RefObject<HTMLInputElement>[]>([]);
 
   /* Hooks */
-  const { handleSubmitUI, handlePageDoneUI, handleAllPagesDoneUI } =
-    useSource();
+  const {
+    handleSubmitUI,
+    handleOcrStartUI,
+    handlePageDoneUI,
+    handleAllPagesDoneUI,
+  } = useSource();
 
   /* Lifecycle Methods */
   useEffect(() => {
@@ -28,6 +32,10 @@ export default function SourceTable() {
     if (!inputVal) return; // TODO: UI error
     handleSubmitUI();
 
+    const onScrapeDone = (_totalPages: number) => {
+      handleOcrStartUI(_totalPages);
+      socket.off("scrape_done", onScrapeDone);
+    };
     const onPageDone = (res: { pageNum: number; blks: string }) => {
       handlePageDoneUI(res);
     };
@@ -39,6 +47,7 @@ export default function SourceTable() {
       socket.disconnect();
     };
     socket.connect();
+    socket.on("scrape_done", handleOcrStartUI);
     socket.on("page_done", onPageDone);
     socket.on("all_pages_done", onAllPagesDone);
     socket.emit("source_chosen", which, inputVal);

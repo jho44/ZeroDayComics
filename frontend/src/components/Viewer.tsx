@@ -47,7 +47,8 @@ export default function Viewer({ pages }: Props) {
     const numPages = pages.length;
     const onLeftSide = !!(pageNum % 2);
 
-    if (pageNum == numPages) return <div className="w-1/2 h-full" />;
+    if (numPages && pageNum == numPages)
+      return <div className="w-1/2 h-full" />;
 
     if (pages[pageNum])
       return (

@@ -38,6 +38,7 @@ async def source_chosen(sid, which: Source, input: str):
   scraper = scrapers[which](input)
   imgs = await scraper.first_scrape()
   logger.info(f'First scrape done {which} {input}')
+  await sio.emit('scrape_done', len(imgs))
 
   await pipeline_files(imgs, sio)
 
