@@ -1,19 +1,27 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { OcrPage } from "../lib/definitions";
 import LoadingCircle from "./LoadingCircle/LoadingCircle";
 import TranslatedPage from "./TranslatedPage";
+import Toolbar from "./Toolbar";
 
 type Props = {
   pages: OcrPage[];
 };
 
 export default function Viewer({ pages }: Props) {
-  /* Constants */
-  const numPages = pages.length;
-
   /* States */
   const [currPage, setCurrPage] = useState(0);
   const [translated, setTranslated] = useState(true);
+  const [downloading, setDownloading] = useState(false);
+  const [numLoaded, setNumLoaded] = useState(0);
+
+  /* Computed */
+  const numPages = pages.length;
+
+  /* Methods */
+  const onLoadImg = () => {
+    setNumLoaded((_prev) => _prev + 1);
+  };
 
   /* Components */
   const Turner = ({ onLeftSide }: { onLeftSide: boolean }) => {
@@ -42,8 +50,17 @@ export default function Viewer({ pages }: Props) {
     );
   };
 
-  const DisplayedPage = ({ pageNum }: { pageNum: number }) => {
+  const DisplayedPage = ({
+    pageNum,
+    visible = true,
+  }: {
+    pageNum: number;
+    visible?: boolean;
+  }) => {
+    /* Constants */
     const scale = 0.8;
+
+    /* Computed */
     const numPages = pages.length;
     const onLeftSide = !!(pageNum % 2);
 
@@ -67,6 +84,9 @@ export default function Viewer({ pages }: Props) {
               page={pages[pageNum]}
               pageNum={pageNum}
               translated={translated}
+              onLoadImg={() => {
+                if (!visible) onLoadImg();
+              }}
             />
           </div>
         </div>
@@ -81,17 +101,32 @@ export default function Viewer({ pages }: Props) {
 
   return (
     <div className="relative w-full">
-      <div className="z-[1] fixed opacity-0 hover:opacity-100 transition-all duration-150 top-0 w-screen flex items-center justify-center p-5 rounded-b-md bg-[#353b45]">
-        <button onClick={() => setTranslated((prev) => !prev)}>
-          {translated ? "Translated" : "Original"}
-        </button>
-      </div>
+      <Toolbar
+        translated={translated}
+        setTranslated={setTranslated}
+        numPages={numPages}
+        downloading={downloading}
+        setDownloading={setDownloading}
+        numLoaded={numLoaded}
+      />
       <Turner onLeftSide={true} />
       <div className="flex h-screen z-[1] relative pointer-events-none">
         <DisplayedPage pageNum={currPage + 1} />
         <DisplayedPage pageNum={currPage} />
       </div>
       <Turner onLeftSide={false} />
+
+      {downloading ? (
+        <div className="absolute left-[100vw]">
+          {Array(numPages)
+            .fill(null)
+            .map((_, pageNum) => (
+              <DisplayedPage pageNum={pageNum} visible={false} key={pageNum} />
+            ))}
+        </div>
+      ) : (
+        <></>
+      )}
     </div>
   );
 }

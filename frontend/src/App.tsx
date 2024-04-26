@@ -28,7 +28,6 @@ function App() {
     pageNum: number;
     blks: string;
   }) => {
-    console.log({ pageNum });
     setPages((_pages) => [
       ..._pages.slice(0, pageNum),
       JSON.parse(blks),

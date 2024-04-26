@@ -31,7 +31,6 @@ yarn start # will show up on localhost:3000
 ### TODO
 
 - propagate socket err to UI
-- download translated pages to fs
 - refine translations second round
 - support LNs
 - ability to edit and move boxes
