@@ -7,17 +7,16 @@ import { OcrPage } from "./lib/definitions";
 
 function App() {
   /* States */
-  const [loadingMsg, setLoadingMsg] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
   const [pages, setPages] = useState<OcrPage[]>([]);
 
   /* Methods */
   const handleSubmitUI = () => {
-    setLoadingMsg("Retrieving the chapter...");
+    setLoading(true);
   };
 
   const handleOcrStartUI = (_totalPages: number) => {
-    // totalPages.current = _totalPages;
-    setLoadingMsg(`Performing OCR and translating ${_totalPages} pages`);
+    setLoading(true);
     setPages(new Array(_totalPages).fill(null));
   };
 
@@ -36,11 +35,11 @@ function App() {
   };
 
   const handleAllPagesDoneUI = () => {
-    setLoadingMsg("");
+    setLoading(false);
   };
 
   const numPagesDone = pages.filter(Boolean).length;
-  if (!loadingMsg && !numPagesDone)
+  if (!loading && !numPagesDone)
     return (
       <SourceContext.Provider
         value={{
@@ -55,11 +54,21 @@ function App() {
     );
 
   return (
-    <div>
-      {loadingMsg ?? (
-        <div>
-          {loadingMsg}...{numPagesDone} / {pages.length}
+    <div className="relative">
+      {loading ? (
+        <div className="loading-bar fixed w-screen left-0 bottom-0 p-4 flex flex-col gap-3 justify-center items-center">
+          <div className="w-full max-w-[200px] h-3 bg-white rounded-sm overflow-hidden">
+            <div
+              className="bg-slate-400 h-full border-[3px] border-white"
+              style={{ width: `${(numPagesDone / pages.length) * 100}%` }}
+            />
+          </div>
+          <p>
+            {numPagesDone} / {pages.length}
+          </p>
         </div>
+      ) : (
+        <></>
       )}
 
       <Viewer pages={pages} />

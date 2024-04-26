@@ -1,5 +1,6 @@
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import { OcrPage } from "../lib/definitions";
+import LoadingCircle from "./LoadingCircle/LoadingCircle";
 import TranslatedPage from "./TranslatedPage";
 
 type Props = {
@@ -26,11 +27,16 @@ export default function Viewer({ pages }: Props) {
       });
     };
 
+    let turnerStyle = onLeftSide ? "" : "right-0";
+
+    if (onLeftSide && currPage + pageDiff < numPages)
+      turnerStyle += " hover:bg-gradient-to-r";
+    else if (!onLeftSide && currPage + pageDiff >= 0)
+      turnerStyle += " hover:bg-gradient-to-l";
+
     return (
       <div
-        className={`absolute w-1/6 top-0 h-full ${
-          onLeftSide ? "" : "right-0"
-        } border ${onLeftSide ? "border-purple-400" : "border-blue-400"}`}
+        className={`absolute w-1/4 top-0 h-full opacity-0 from-slate-100/20 to-transparent ease-in duration-150 transition-all hover:opacity-100 ${turnerStyle}`}
         onClick={handleTurn}
       />
     );
@@ -67,14 +73,14 @@ export default function Viewer({ pages }: Props) {
 
     return (
       <div className="w-1/2 h-full flex justify-center items-center">
-        Loading
+        <LoadingCircle size="2rem" thickness="0.2rem" />
       </div>
     );
   };
 
   return (
     <div className="relative w-full">
-      <div className="fixed top-0 w-screen flex items-center justify-center p-4 bg-purple-300">
+      <div className="z-[1] fixed opacity-0 hover:opacity-100 transition-all duration-150 top-0 w-screen flex items-center justify-center p-5 rounded-b-md bg-[#353b45]">
         <button onClick={() => setTranslated((prev) => !prev)}>
           {translated ? "Translated" : "Original"}
         </button>
