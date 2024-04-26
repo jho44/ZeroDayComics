@@ -1,4 +1,5 @@
 import { ChangeEvent, useState } from "react";
+import { arrayBufferToWebP } from "webp-converter-browser";
 import { useSource } from "../../contexts/Source";
 import { socket } from "../../socket";
 import styles from "./SourceSelector.module.css";
@@ -14,6 +15,7 @@ export default function Upload() {
   /* States */
   const [files, setFiles] = useState<FilesObj>({});
 
+  /* Methods */
   const handleFileEvent = (e: ChangeEvent<HTMLInputElement>) => {
     const chosenFiles = Array.prototype.slice.call(e.target.files);
     const newFiles: FilesObj = {};
@@ -27,7 +29,7 @@ export default function Upload() {
   const handleUpload = async () => {
     const actualFiles = Object.values(files);
     const numFiles = actualFiles.length;
-    if (!numFiles) return; // TODO: UI Error
+    if (!numFiles) return;
 
     handleOcrStartUI(numFiles);
 
@@ -35,17 +37,38 @@ export default function Upload() {
       handlePageDoneUI(res);
     };
 
-    const onAllPagesDone = () => {
-      handleAllPagesDoneUI();
+    const cleanup = () => {
+      socket.off("err");
       socket.off("page_done", onPageDone);
       socket.off("all_pages_done", onAllPagesDone);
       socket.disconnect();
     };
 
+    const onAllPagesDone = () => {
+      handleAllPagesDoneUI();
+      cleanup();
+    };
+
+    const onErr = () => {
+      // TODO: UI for error handling
+      cleanup();
+    };
+
     socket.connect();
+    socket.on("error", onErr);
     socket.on("page_done", onPageDone);
     socket.on("all_pages_done", onAllPagesDone);
-    socket.emit("files_uploaded", actualFiles);
+    socket.emit(
+      "files_uploaded",
+      await Promise.all(
+        actualFiles.map(async (file) => await convertToWebp(file))
+      )
+    );
+  };
+
+  const convertToWebp = async (file: File) => {
+    const res = await arrayBufferToWebP(await file.arrayBuffer());
+    return res;
   };
 
   return (
@@ -67,8 +90,8 @@ export default function Upload() {
       <table className="border-separate border-spacing-x-4 border-spacing-y-3">
         <tbody className="max-h-[100px] block overflow-scroll">
           {Object.keys(files).map((fname) => (
-            <tr key={fname} className="gap-4">
-              <td className="">{fname} </td>
+            <tr key={fname}>
+              <td>{fname}</td>
               <td>
                 <button
                   onClick={() => {

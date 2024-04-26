@@ -7,11 +7,7 @@ from _shared.encoders import NumpyEncoder
 
 def convert_to_img(file):
   """Takes File and turns into img matrix"""
-  try:
-    return np.array(Image.open(BytesIO(file)))
-  except:
-    print('Something went wrong with convert_to_img')
-    # TODO: raise exception and maybe cancel a task?
+  return np.array(Image.open(BytesIO(file)))
 
 def load_json(path):
   with open(path, 'r', encoding='utf-8') as f:
