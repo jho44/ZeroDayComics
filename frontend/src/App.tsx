@@ -1,53 +1,23 @@
-import { useState } from "react";
 import "./App.css";
+import LoadingBar from "./components/LoadingBar";
 import SourceSelector from "./components/SourceSelector/SourceSelector";
 import Viewer from "./components/Viewer";
 import { SourceContext } from "./contexts/Source";
-import { OcrPage } from "./lib/definitions";
-import LoadingBar from "./components/LoadingBar";
+import usePipeline from "./lib/usePipeline";
 
 function App() {
-  /* States */
-  const [loading, setLoading] = useState<boolean>(false);
-  const [pages, setPages] = useState<OcrPage[]>([]);
+  /* Hooks */
+  const { loading, pages, handleSubmitUI, handleResponse } = usePipeline();
 
-  /* Methods */
-  const handleSubmitUI = () => {
-    setLoading(true);
-  };
-
-  const handleOcrStartUI = (_totalPages: number) => {
-    setLoading(true);
-    setPages(new Array(_totalPages).fill(null));
-  };
-
-  const handlePageDoneUI = ({
-    pageNum,
-    blks,
-  }: {
-    pageNum: number;
-    blks: string;
-  }) => {
-    setPages((_pages) => [
-      ..._pages.slice(0, pageNum),
-      JSON.parse(blks),
-      ..._pages.slice(pageNum + 1),
-    ]);
-  };
-
-  const handleAllPagesDoneUI = () => {
-    setLoading(false);
-  };
-
+  /* Computed */
   const numPagesDone = pages.filter(Boolean).length;
+
   if (!loading && !numPagesDone)
     return (
       <SourceContext.Provider
         value={{
           handleSubmitUI,
-          handleOcrStartUI,
-          handlePageDoneUI,
-          handleAllPagesDoneUI,
+          handleResponse,
         }}
       >
         <SourceSelector />

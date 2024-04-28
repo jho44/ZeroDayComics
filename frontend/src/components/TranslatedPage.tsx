@@ -1,6 +1,4 @@
-import { Buffer } from "buffer";
 import { OcrPage } from "../lib/definitions";
-import { forwardRef, MutableRefObject, useRef } from "react";
 
 type Props = {
   page: OcrPage;
@@ -16,14 +14,11 @@ export default function TranslatedPage({
   translated,
   onLoadImg = () => {},
 }: Props) {
-  /* Refs */
-  // const imgRef = useRef<HTMLImageElement | null>(null);
-
   /* Computed */
-  const src = `data:image/png;base64,${Buffer.from(page.img, "binary").toString(
-    "base64"
-  )}`;
-
+  // const src = `data:image/png;base64,${Buffer.from(page.img, "binary").toString(
+  //   "base64"
+  // )}`;
+  const src = `data:image/webp;base64,${page.img}`;
   return (
     <div id={`page-${pageNum}`} className="relative">
       <img

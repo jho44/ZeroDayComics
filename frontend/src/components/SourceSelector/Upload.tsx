@@ -1,7 +1,6 @@
 import { ChangeEvent, useState } from "react";
 import { arrayBufferToWebP } from "webp-converter-browser";
 import { useSource } from "../../contexts/Source";
-import { socket } from "../../socket";
 import styles from "./SourceSelector.module.css";
 
 type FilesObj = { [key: string]: File };
@@ -9,8 +8,7 @@ type FilesObj = { [key: string]: File };
 // https://levelup.gitconnected.com/how-to-implement-multiple-file-uploads-in-react-4cdcaadd0f6e
 export default function Upload() {
   /* Hooks */
-  const { handleOcrStartUI, handlePageDoneUI, handleAllPagesDoneUI } =
-    useSource();
+  const { handleSubmitUI, handleResponse } = useSource();
 
   /* States */
   const [files, setFiles] = useState<FilesObj>({});
@@ -31,39 +29,19 @@ export default function Upload() {
     const numFiles = actualFiles.length;
     if (!numFiles) return;
 
-    handleOcrStartUI(numFiles);
+    handleSubmitUI({ numPages: numFiles });
 
-    const onPageDone = (res: { pageNum: number; blks: string }) => {
-      handlePageDoneUI(res);
-    };
-
-    const cleanup = () => {
-      socket.off("err");
-      socket.off("page_done", onPageDone);
-      socket.off("all_pages_done", onAllPagesDone);
-      socket.disconnect();
-    };
-
-    const onAllPagesDone = () => {
-      handleAllPagesDoneUI();
-      cleanup();
-    };
-
-    const onErr = () => {
-      // TODO: UI for error handling
-      cleanup();
-    };
-
-    socket.connect();
-    socket.on("error", onErr);
-    socket.on("page_done", onPageDone);
-    socket.on("all_pages_done", onAllPagesDone);
-    socket.emit(
-      "files_uploaded",
-      await Promise.all(
-        actualFiles.map(async (file) => await convertToWebp(file))
+    const formData = new FormData();
+    await Promise.all(
+      actualFiles.map(async (file) =>
+        formData.append("files[]", await convertToWebp(file))
       )
     );
+
+    fetch("http://localhost:4000/files_uploaded", {
+      method: "POST",
+      body: formData,
+    }).then(async (res) => await handleResponse(res));
   };
 
   const convertToWebp = async (file: File) => {

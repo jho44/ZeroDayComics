@@ -24,7 +24,7 @@ export default function Toolbar({
 
   /* Lifecycle Methods */
   useEffect(() => {
-    if (numLoaded !== numPages) return;
+    if (!numPages || numLoaded !== numPages) return;
 
     const createZipFolder = async () => {
       await Promise.all(

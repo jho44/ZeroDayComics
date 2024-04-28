@@ -1,20 +1,14 @@
-import { useState, RefObject, useEffect, createRef, Fragment } from "react";
+import { createRef, Fragment, RefObject, useEffect, useState } from "react";
+import { useSource } from "../../contexts/Source";
 import { Source, sources } from "../../lib/definitions";
 import styles from "./SourceSelector.module.css";
-import { socket } from "../../socket";
-import { useSource } from "../../contexts/Source";
 
 export default function SourceTable() {
   /* States */
   const [inputRefs, setInputRefs] = useState<RefObject<HTMLInputElement>[]>([]);
 
   /* Hooks */
-  const {
-    handleSubmitUI,
-    handleOcrStartUI,
-    handlePageDoneUI,
-    handleAllPagesDoneUI,
-  } = useSource();
+  const { handleSubmitUI, handleResponse } = useSource();
 
   /* Lifecycle Methods */
   useEffect(() => {
@@ -27,32 +21,21 @@ export default function SourceTable() {
   }, []);
 
   /* Methods */
-  const handleSubmit = async (which: Source, i: number) => {
+  const handleSubmit = (which: Source, i: number) => {
     const inputVal = inputRefs[i]?.current?.value;
     if (!inputVal) return; // TODO: UI error
     handleSubmitUI();
 
-    const onScrapeDone = (_totalPages: number) => {
-      handleOcrStartUI(_totalPages);
-      socket.off("scrape_done", onScrapeDone);
-    };
-    const onPageDone = (res: { pageNum: number; blks: string }) => {
-      handlePageDoneUI(res);
-    };
-
-    const onAllPagesDone = () => {
-      handleAllPagesDoneUI();
-      socket.off("page_done", onPageDone);
-      socket.off("all_pages_done", onAllPagesDone);
-      socket.disconnect();
-    };
-    socket.connect();
-    socket.on("scrape_done", handleOcrStartUI);
-    socket.on("page_done", onPageDone);
-    socket.on("all_pages_done", onAllPagesDone);
-    socket.emit("source_chosen", which, inputVal);
-
-    socket.on("page_done", onPageDone);
+    fetch("http://localhost:4000/source_chosen", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        which,
+        input: inputVal,
+      }),
+    }).then(async (res) => await handleResponse(res));
   };
 
   return (

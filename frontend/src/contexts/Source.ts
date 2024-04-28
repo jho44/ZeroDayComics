@@ -1,10 +1,8 @@
 import { createContext, useContext } from "react";
 
 interface SourceContextType {
-  handleSubmitUI: () => void;
-  handleOcrStartUI: (_totalPages: number) => void;
-  handlePageDoneUI: (page: { pageNum: number; blks: string }) => void;
-  handleAllPagesDoneUI: () => void;
+  handleSubmitUI: (payload?: { numPages: number }) => void;
+  handleResponse: (res: Response) => Promise<void>;
 }
 
 const SourceContext = createContext<SourceContextType | null>(null);
