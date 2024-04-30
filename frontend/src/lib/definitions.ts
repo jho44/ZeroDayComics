@@ -10,17 +10,18 @@ export const sources = [
   },
 ];
 
+export type Block = {
+  box: number[];
+  vertical: boolean;
+  font_size: number;
+  lines: string[];
+};
+
 export type OcrPage = {
   img_width: number;
   img_height: number;
-  blocks: {
-    box: number[];
-    vertical: boolean;
-    font_size: number;
-    lines_coords: number[][];
-    lines: string[];
-    translation: string;
-  }[];
+  transl_blocks: Block[];
+  blocks: Block[];
   sorted?: boolean;
   img: string;
 };

@@ -49,6 +49,7 @@ export default function SourceTable() {
           </div>
           <div className="flex gap-4">
             <input
+              id={label}
               type="text"
               placeholder={example}
               ref={inputRefs[i]}

@@ -1,6 +1,6 @@
 import { toPng } from "html-to-image";
 import JSZip from "jszip";
-import { Dispatch, SetStateAction, useEffect, useRef } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 
 type Props = {
   translated: boolean;
@@ -19,21 +19,24 @@ export default function Toolbar({
   setDownloading,
   numLoaded,
 }: Props) {
-  /* Refs */
-  const zip = useRef(new JSZip());
+  // /* Refs */
+  // const zip = useRef(new JSZip());
 
   /* Lifecycle Methods */
   useEffect(() => {
     if (!numPages || numLoaded !== numPages) return;
 
     const createZipFolder = async () => {
+      const zip = new JSZip();
+
       await Promise.all(
         Array(numPages)
           .fill(null)
           .map(async (_, pageNum) => {
             const imgData = await convertToPng(pageNum);
             if (!imgData) return null;
-            zip.current.file(
+            console.log(imgData);
+            zip.file(
               `${pageNum}.png`,
               imgData.replace(/^data:image\/?[A-z]*;base64,/, ""),
               { base64: true }
@@ -41,7 +44,7 @@ export default function Toolbar({
           })
       );
 
-      const zipData = await zip.current
+      const zipData = await zip
         .generateAsync({
           type: "blob",
           streamFiles: true,
@@ -74,6 +77,7 @@ export default function Toolbar({
   const convertToPng = (pageNum: number) => {
     const node = document.getElementById(`page-${pageNum}`);
     if (!node) return null;
+    // TODO: toPng ain't doin its job anymore after the intro of Translated vs SourceBoxes x.x
     return toPng(node)
       .then((dataUrl) => dataUrl)
       .catch((error) => {

@@ -2,7 +2,10 @@
 
 ## backend
 
-aiohttp + python-socketio
+aiohttp ~~+ python-socketio~~
+
+- move away from websockets since websockets are all about 2-way communication but my setup just has the client kick off initial req and keep accepting events after till done
+- not very difficult to add websockets back tho since everything is so modularized
 
 ### Run
 

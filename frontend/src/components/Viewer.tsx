@@ -1,8 +1,8 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { OcrPage } from "../lib/definitions";
 import LoadingCircle from "./LoadingCircle/LoadingCircle";
-import TranslatedPage from "./TranslatedPage";
 import Toolbar from "./Toolbar";
+import TranslatedPage from "./TranslatedPage/TranslatedPage";
 
 type Props = {
   pages: OcrPage[];

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { OcrPage } from "./definitions";
+import { Block, OcrPage } from "./definitions";
 
 export default function usePipeline() {
   /* States */
@@ -24,6 +24,25 @@ export default function usePipeline() {
       blks,
       ..._pages.slice(pageNum + 1),
     ]);
+  };
+
+  const handleTextEdit = ({
+    pageNum,
+    blockNum,
+    val,
+  }: {
+    pageNum: number;
+    blockNum: number;
+    val: string;
+  }) => {
+    // setPages((_pages) => {
+    //   const page = { ..._pages[pageNum] };
+
+    //   page.transl_blocks[blockNum].lines = [val];
+    //   return [..._pages.slice(0, pageNum), page, ..._pages.slice(pageNum + 1)];
+    // });
+    pages[pageNum].transl_blocks[blockNum].lines = [val];
+    // not using setPages bc don't want to rerender after every edit
   };
 
   const handleAllPagesDoneUI = () => {
@@ -82,5 +101,6 @@ export default function usePipeline() {
     pages,
     handleSubmitUI,
     handleResponse,
+    handleTextEdit,
   };
 }

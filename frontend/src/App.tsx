@@ -3,11 +3,13 @@ import LoadingBar from "./components/LoadingBar";
 import SourceSelector from "./components/SourceSelector/SourceSelector";
 import Viewer from "./components/Viewer";
 import { SourceContext } from "./contexts/Source";
+import { ViewerContext } from "./contexts/Viewer";
 import usePipeline from "./lib/usePipeline";
 
 function App() {
   /* Hooks */
-  const { loading, pages, handleSubmitUI, handleResponse } = usePipeline();
+  const { loading, pages, handleSubmitUI, handleResponse, handleTextEdit } =
+    usePipeline();
 
   /* Computed */
   const numPagesDone = pages.filter(Boolean).length;
@@ -33,7 +35,13 @@ function App() {
         {loading && !pages.length && <p>Retrieving pages...</p>}
       </div>
 
-      <Viewer pages={pages} />
+      <ViewerContext.Provider
+        value={{
+          handleTextEdit,
+        }}
+      >
+        <Viewer pages={pages} />
+      </ViewerContext.Provider>
     </div>
   );
 }
