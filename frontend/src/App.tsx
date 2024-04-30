@@ -8,8 +8,14 @@ import usePipeline from "./lib/usePipeline";
 
 function App() {
   /* Hooks */
-  const { loading, pages, handleSubmitUI, handleResponse, handleTextEdit } =
-    usePipeline();
+  const {
+    loading,
+    pages,
+    handleSubmitUI,
+    handleResponse,
+    handleTextEdit,
+    handleBoxDragResize,
+  } = usePipeline();
 
   /* Computed */
   const numPagesDone = pages.filter(Boolean).length;
@@ -38,6 +44,7 @@ function App() {
       <ViewerContext.Provider
         value={{
           handleTextEdit,
+          handleBoxDragResize,
         }}
       >
         <Viewer pages={pages} />

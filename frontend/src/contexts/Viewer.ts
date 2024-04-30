@@ -10,6 +10,17 @@ interface ViewerContextType {
     blockNum: number;
     val: string;
   }) => void;
+  handleBoxDragResize: ({
+    pageNum,
+    blockNum,
+    ...edits
+  }: {
+    pageNum: number;
+    blockNum: number;
+    transform: string;
+    width: number;
+    height: number;
+  }) => void;
 }
 
 const ViewerContext = createContext<ViewerContextType | null>(null);

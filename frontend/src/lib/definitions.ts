@@ -11,6 +11,7 @@ export const sources = [
 ];
 
 export type Block = {
+  transform?: { transform: string; width: number; height: number };
   box: number[];
   vertical: boolean;
   font_size: number;

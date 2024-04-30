@@ -28,21 +28,18 @@ export default function TranslatedPage({
         }}
       />
       <div
-        className="absolute left-0 top-0 z-[1]"
+        className="absolute left-0 top-0"
         style={{
           width: `${page.img_width}px`,
           height: `${page.img_height}px`,
         }}
       >
         {translated
-          ? page.transl_blocks.map(({ box, lines, font_size, vertical }, i) => (
+          ? page.transl_blocks.map((block, i) => (
               <TranslatedBox
+                block={block}
                 pageNum={pageNum}
-                box={box}
-                line={lines[0]}
-                fontSize={font_size}
-                vertical={vertical}
-                boxNum={i}
+                blockNum={i}
                 key={i}
               />
             ))

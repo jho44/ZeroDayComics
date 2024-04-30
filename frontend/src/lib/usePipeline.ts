@@ -45,6 +45,53 @@ export default function usePipeline() {
     // not using setPages bc don't want to rerender after every edit
   };
 
+  const handleBoxMove = ({
+    dx,
+    dy,
+    pageNum,
+    blockNum,
+  }: {
+    dx: number;
+    dy: number;
+    pageNum: number;
+    blockNum: number;
+  }) => {
+    pages[pageNum].transl_blocks[blockNum].box[0] += dx;
+    pages[pageNum].transl_blocks[blockNum].box[2] += dx;
+    pages[pageNum].transl_blocks[blockNum].box[1] += dy;
+    pages[pageNum].transl_blocks[blockNum].box[3] += dy;
+  };
+
+  const handleBoxResize = ({
+    dBox,
+    pageNum,
+    blockNum,
+  }: {
+    dBox: number[];
+    pageNum: number;
+    blockNum: number;
+  }) => {
+    // box: LTRB
+    console.log(dBox);
+    dBox.forEach(
+      (d, i) => (pages[pageNum].transl_blocks[blockNum].box[i] += d)
+    );
+    // dl: number; dt: number; dr: number; d
+  };
+
+  const handleBoxDragResize = ({
+    pageNum,
+    blockNum,
+    ...edits
+  }: {
+    pageNum: number;
+    blockNum: number;
+    transform: string;
+    width: number;
+    height: number;
+  }) => {
+    pages[pageNum].transl_blocks[blockNum].transform = edits;
+  };
   const handleAllPagesDoneUI = () => {
     setLoading(false);
   };
@@ -102,5 +149,6 @@ export default function usePipeline() {
     handleSubmitUI,
     handleResponse,
     handleTextEdit,
+    handleBoxDragResize,
   };
 }
