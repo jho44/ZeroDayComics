@@ -1,5 +1,6 @@
 import { OcrPage } from "../../lib/definitions";
-import { SourceBox, TranslatedBox } from "./Boxes";
+import TranslatedBox from "./TranslatedBox";
+import SourceBox from "./SourceBox";
 
 type Props = {
   page: OcrPage;

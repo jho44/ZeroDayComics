@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 
 function Button({
   children,
@@ -18,15 +18,26 @@ function Button({
 }
 
 export default function EditorToolbar({
-  // pageN
+  hoveringOnTarget,
   handleFontSizeChange,
 }: {
+  hoveringOnTarget: boolean;
   handleFontSizeChange: (diff: number) => void;
   // pageNum: number;
   // blockNum: number;
 }) {
+  /* States */
+  const [hovering, setHovering] = useState(false);
+
   return (
-    <div className="absolute left-1/2 -translate-x-1/2 -top-[35px] flex gap-1 rounded-lg p-1 bg-zinc-100 text-black">
+    <div
+      className="absolute left-1/2 -translate-x-1/2 -top-[35px] flex gap-1 rounded-lg p-1 bg-zinc-100 text-black"
+      style={{
+        visibility: hoveringOnTarget || hovering ? "visible" : "hidden",
+      }}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+    >
       <Button onClick={() => handleFontSizeChange(1)}>+</Button>
       <Button onClick={() => handleFontSizeChange(-1)}>-</Button>
     </div>

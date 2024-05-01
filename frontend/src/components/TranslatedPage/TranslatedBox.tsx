@@ -10,7 +10,7 @@ const parseTransform = (transform: string | undefined) => {
   );
 };
 
-export const TranslatedBox = ({
+export default function TranslatedBox({
   block,
   pageNum,
   blockNum,
@@ -18,7 +18,7 @@ export const TranslatedBox = ({
   block: Block;
   pageNum: number;
   blockNum: number;
-}) => {
+}) {
   /* 
     Notes: WHILE resizing and dragging, will perform transforms and size changes to target itself
     on resize and drag end, apply the transforms and size changes to the parent instead
@@ -35,6 +35,7 @@ export const TranslatedBox = ({
   /* States */
   const [hovering, setHovering] = useState(false);
   const [fontSize, setFontSize] = useState(block.font_size);
+  const [popperOpen, setPopperOpen] = useState(false);
 
   /* Refs */
   const targetRef = useRef<HTMLDivElement>(null);
@@ -67,7 +68,10 @@ export const TranslatedBox = ({
   };
 
   return (
-    <div className="pointer-events-auto">
+    <div
+      className="pointer-events-auto"
+      onMouseLeave={() => setHovering(false)}
+    >
       <div
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={(e) => {
@@ -90,7 +94,10 @@ export const TranslatedBox = ({
           transform: block.transform?.transform,
         }}
       >
-        <EditorToolbar handleFontSizeChange={handleFontSizeChange} />
+        <EditorToolbar
+          handleFontSizeChange={handleFontSizeChange}
+          hoveringOnTarget={hovering}
+        />
         <div
           ref={targetRef}
           style={{
@@ -183,41 +190,4 @@ export const TranslatedBox = ({
       />
     </div>
   );
-};
-
-export const SourceBox = ({
-  box,
-  fontSize,
-  vertical,
-  boxNum,
-  lines,
-}: {
-  box: number[];
-  fontSize: number;
-  vertical: boolean;
-  boxNum: number;
-  lines: string[];
-}) => {
-  return (
-    <div
-      onClick={(e) => {
-        e.stopPropagation();
-        console.log("click handler");
-      }}
-      className="bg-white absolute border border-red-700 text-black pointer-events-auto overflow-hidden resize-none"
-      style={{
-        width: `${box[2] - box[0]}px`,
-        height: `${box[3] - box[1]}px`,
-        left: `${box[0]}px`,
-        top: `${box[1]}px`,
-        fontSize: `${fontSize}px`,
-        zIndex: boxNum,
-        writingMode: vertical ? ("vertical-rl" as const) : ("unset" as const),
-      }}
-    >
-      {lines.map((line, j) => (
-        <p key={j}>{line}</p>
-      ))}
-    </div>
-  );
-};
+}
