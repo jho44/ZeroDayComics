@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import Moveable from "react-moveable";
+import Moveable, { OnDragEnd, OnResizeEnd } from "react-moveable";
 import { useViewer } from "../../contexts/Viewer";
 import { Block } from "../../lib/definitions";
 
@@ -8,6 +8,7 @@ const parseTransform = (transform: string | undefined) => {
     transform?.match(/-?\d+(\.\d+)?/g)?.map((x) => parseFloat(x)) ?? [0, 0]
   );
 };
+
 export const TranslatedBox = ({
   block,
   pageNum,
@@ -17,6 +18,12 @@ export const TranslatedBox = ({
   pageNum: number;
   blockNum: number;
 }) => {
+  /* 
+    Notes: WHILE resizing and dragging, will perform transforms and size changes to target itself
+    on resize and drag end, apply the transforms and size changes to the parent instead
+    intent on having a parent around the child bc want an invisible border we can hover over to activate box edges
+  */
+
   /* Contexts */
   const { handleBoxDragResize, handleTextEdit } = useViewer();
 
@@ -32,6 +39,16 @@ export const TranslatedBox = ({
   const height = block.transform?.height ?? block.box[3] - block.box[1];
   const PADDING = 10;
 
+  /* Methods */
+  const shiftTransformToParent = (e: OnDragEnd | OnResizeEnd) => {
+    const [pDx, pDy] = parseTransform(e.target.parentElement!.style.transform);
+    const [cDx, cDy] = parseTransform(e.target.style.transform);
+
+    const transform = `translate(${pDx + cDx}px, ${pDy + cDy}px)`;
+    e.target.parentElement!.style.transform = transform;
+    e.target.style.transform = "";
+    return transform;
+  };
   return (
     <div className="pointer-events-auto">
       <div
@@ -51,17 +68,9 @@ export const TranslatedBox = ({
           height: `${height + PADDING * 2}px`,
           left: `${block.box[0] - PADDING}px`,
           top: `${block.box[1] - PADDING}px`,
-          border: `${PADDING}px solid red`,
-          // width: `${width}px`,
-          // height: `${height}px`,
-          // left: `${block.box[0]}px`,
-          // top: `${block.box[1]}px`,
-          // border: `${PADDING}px solid red`,
-          // boxSizing: "border-box",
-
+          border: `${PADDING}px solid transparent`,
           zIndex: blockNum,
           transform: block.transform?.transform,
-          background: "pink",
         }}
       >
         <div
@@ -69,20 +78,11 @@ export const TranslatedBox = ({
           style={{
             width: `${width}px`,
             height: `${height}px`,
-            background: "blue",
-          }}
-          className="flex justify-center items-center pointer-events-auto"
-        >
-          <div className="max-w-full max-h-full ">Target</div>
-        </div>
-        {/* <div
-          style={{
-            width: `${width}px`,
-            height: `${height}px`,
           }}
           className="overflow-hidden bg-white flex justify-center items-center"
         >
           <div
+            className="text-black text-center max-w-full max-h-full outline-0"
             onBlur={(e) => {
               handleTextEdit({
                 pageNum,
@@ -93,19 +93,9 @@ export const TranslatedBox = ({
             onClick={(e) => {
               e.currentTarget.focus();
             }}
-            className="text-black text-center max-w-full max-h-full outline-0"
-            defaultValue={block.lines[0]}
             contentEditable={true}
             suppressContentEditableWarning={true}
-        style={{
-        style={{
-          width: `${width}px`,
-          height: `${height}px`,
-          transform: block.transform?.transform,
             style={{
-          width: `${width}px`,
-          height: `${height}px`,
-          transform: block.transform?.transform,
               fontSize: `${block.font_size}px`,
               writingMode: block.vertical
                 ? ("vertical-rl" as const)
@@ -114,7 +104,7 @@ export const TranslatedBox = ({
           >
             {block.lines[0]}
           </div>
-        </div> */}
+        </div>
       </div>
       <Moveable
         hideDefaultLines={!hovering}
@@ -132,14 +122,7 @@ export const TranslatedBox = ({
         }
         onDragEnd={(e) => {
           if (e.target.parentElement) {
-            const [pDx, pDy] = parseTransform(
-              e.target.parentElement.style.transform
-            );
-            const [cDx, cDy] = parseTransform(e.target.style.transform);
-
-            const transform = `translate(${pDx + cDx}px, ${pDy + cDy}px)`;
-            e.target.parentElement.style.transform = transform;
-            e.target.style.transform = "";
+            const transform = shiftTransformToParent(e);
 
             handleBoxDragResize({
               pageNum,
@@ -151,18 +134,6 @@ export const TranslatedBox = ({
           }
         }}
         onDrag={(e) => {
-          // const [dx, dy] = parseTransform(e.transform);
-          // const [prevDx, prevDy] = parseTransform(
-          //   e.target.parentElement?.style.transform
-          // );
-          // if (e.target.parentElement) {
-          //   e.target.parentElement.style.transform = `translate(${
-          //     prevDx + dx
-          //   }px, ${prevDy + dy}px)`;
-          // }
-
-          // if (e.target.parentElement)
-          //   e.target.parentElement.style.transform = e.transform;
           e.target.style.transform = e.transform;
         }}
         onResizeEnd={(e) => {
@@ -175,14 +146,7 @@ export const TranslatedBox = ({
               newHeight + PADDING * 2
             }px`;
 
-            const [pDx, pDy] = parseTransform(
-              e.target.parentElement.style.transform
-            );
-            const [cDx, cDy] = parseTransform(e.target.style.transform);
-
-            const transform = `translate(${pDx + cDx}px, ${pDy + cDy}px)`;
-            e.target.parentElement.style.transform = transform;
-            e.target.style.transform = "";
+            const transform = shiftTransformToParent(e);
 
             handleBoxDragResize({
               pageNum,
