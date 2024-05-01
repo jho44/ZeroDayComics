@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import Moveable, { OnDragEnd, OnResizeEnd } from "react-moveable";
 import { useViewer } from "../../contexts/Viewer";
 import { Block } from "../../lib/definitions";
+import EditorToolbar from "./EditorToolbar";
 
 const parseTransform = (transform: string | undefined) => {
   return (
@@ -25,10 +26,15 @@ export const TranslatedBox = ({
   */
 
   /* Contexts */
-  const { handleBoxDragResize, handleTextEdit } = useViewer();
+  const {
+    handleBoxDragResize,
+    handleTextEdit,
+    handleFontSizeChange: saveNewFontSize,
+  } = useViewer();
 
   /* States */
   const [hovering, setHovering] = useState(false);
+  const [fontSize, setFontSize] = useState(block.font_size);
 
   /* Refs */
   const targetRef = useRef<HTMLDivElement>(null);
@@ -49,6 +55,17 @@ export const TranslatedBox = ({
     e.target.style.transform = "";
     return transform;
   };
+
+  const handleFontSizeChange = (diff: number) => {
+    setFontSize((_fontSize) => {
+      const newFontSize = _fontSize + diff;
+      if (newFontSize < 6 || newFontSize > 32) return _fontSize;
+
+      saveNewFontSize({ blockNum, pageNum, newFontSize });
+      return newFontSize;
+    });
+  };
+
   return (
     <div className="pointer-events-auto">
       <div
@@ -73,6 +90,7 @@ export const TranslatedBox = ({
           transform: block.transform?.transform,
         }}
       >
+        <EditorToolbar handleFontSizeChange={handleFontSizeChange} />
         <div
           ref={targetRef}
           style={{
@@ -96,7 +114,7 @@ export const TranslatedBox = ({
             contentEditable={true}
             suppressContentEditableWarning={true}
             style={{
-              fontSize: `${block.font_size}px`,
+              fontSize: `${fontSize}px`,
               writingMode: block.vertical
                 ? ("vertical-rl" as const)
                 : ("unset" as const),

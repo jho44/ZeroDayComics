@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Block, OcrPage } from "./definitions";
+import { OcrPage } from "./definitions";
 
 export default function usePipeline() {
   /* States */
@@ -45,38 +45,16 @@ export default function usePipeline() {
     // not using setPages bc don't want to rerender after every edit
   };
 
-  const handleBoxMove = ({
-    dx,
-    dy,
+  const handleFontSizeChange = ({
     pageNum,
     blockNum,
+    newFontSize,
   }: {
-    dx: number;
-    dy: number;
     pageNum: number;
     blockNum: number;
+    newFontSize: number;
   }) => {
-    pages[pageNum].transl_blocks[blockNum].box[0] += dx;
-    pages[pageNum].transl_blocks[blockNum].box[2] += dx;
-    pages[pageNum].transl_blocks[blockNum].box[1] += dy;
-    pages[pageNum].transl_blocks[blockNum].box[3] += dy;
-  };
-
-  const handleBoxResize = ({
-    dBox,
-    pageNum,
-    blockNum,
-  }: {
-    dBox: number[];
-    pageNum: number;
-    blockNum: number;
-  }) => {
-    // box: LTRB
-    console.log(dBox);
-    dBox.forEach(
-      (d, i) => (pages[pageNum].transl_blocks[blockNum].box[i] += d)
-    );
-    // dl: number; dt: number; dr: number; d
+    pages[pageNum].transl_blocks[blockNum].font_size = newFontSize;
   };
 
   const handleBoxDragResize = ({
@@ -92,6 +70,7 @@ export default function usePipeline() {
   }) => {
     pages[pageNum].transl_blocks[blockNum].transform = edits;
   };
+
   const handleAllPagesDoneUI = () => {
     setLoading(false);
   };
@@ -150,5 +129,6 @@ export default function usePipeline() {
     handleResponse,
     handleTextEdit,
     handleBoxDragResize,
+    handleFontSizeChange,
   };
 }

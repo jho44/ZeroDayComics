@@ -21,6 +21,15 @@ interface ViewerContextType {
     width: number;
     height: number;
   }) => void;
+  handleFontSizeChange: ({
+    pageNum,
+    blockNum,
+    newFontSize,
+  }: {
+    pageNum: number;
+    blockNum: number;
+    newFontSize: number;
+  }) => void;
 }
 
 const ViewerContext = createContext<ViewerContextType | null>(null);

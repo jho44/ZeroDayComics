@@ -15,6 +15,7 @@ function App() {
     handleResponse,
     handleTextEdit,
     handleBoxDragResize,
+    handleFontSizeChange,
   } = usePipeline();
 
   /* Computed */
@@ -45,6 +46,7 @@ function App() {
         value={{
           handleTextEdit,
           handleBoxDragResize,
+          handleFontSizeChange,
         }}
       >
         <Viewer pages={pages} />
