@@ -1,15 +1,16 @@
+from typing import Any, Coroutine
 from .Translator import Translator
-from openai import OpenAI
+from openai import AsyncOpenAI
 import json
 
 class Gpt(Translator):
   _PROMPT_TEMPLATE = "You will be given an array of strings. Each entry is the speech bubble of a comic page. Translate them to English while keeping the page's context in mind. Return a JSON like { result: [TRANSL_1, TRANSL_2, ...] }."
 
   def __init__(self) -> None:
-    self.model = OpenAI()
+    self.model = AsyncOpenAI()
 
-  def translate(self, lines: list[str]) -> list[str]:
-    res = self.model.chat.completions.create(
+  async def translate(self, lines: list[str]) -> Coroutine[Any, Any, list[str]]:
+    res = await self.model.chat.completions.create(
       model="gpt-3.5-turbo-0125",
       response_format={ "type": "json_object" },
       messages=[

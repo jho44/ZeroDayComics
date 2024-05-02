@@ -1,6 +1,7 @@
 from _shared.encoders import NumpyEncoder
 from adaptors.MokuroAdaptor import MokuroAdaptor
 from adaptors.Adaptor import Adaptor
+# from translators.Gpt import Gpt
 from translators.Deeplx import Deeplx
 from translators.Translator import Translator
 import json

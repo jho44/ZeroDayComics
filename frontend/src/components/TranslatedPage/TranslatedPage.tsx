@@ -60,13 +60,11 @@ export default function TranslatedPage({
                 /> */}
               </Fragment>
             ))
-          : page.blocks.map(({ box, lines, font_size, vertical }, i) => (
+          : page.blocks.map((block, i) => (
               <SourceBox
                 key={i}
-                box={box}
-                lines={lines}
-                fontSize={font_size}
-                vertical={vertical}
+                {...block}
+                img_width={page.img_width}
                 boxNum={i}
               />
             ))}
