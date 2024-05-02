@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { OcrPage } from "../../lib/definitions";
 import TranslatedBox from "./TranslatedBox";
 import SourceBox from "./SourceBox";
@@ -37,12 +38,27 @@ export default function TranslatedPage({
       >
         {translated
           ? page.transl_blocks.map((block, i) => (
-              <TranslatedBox
-                block={block}
-                pageNum={pageNum}
-                blockNum={i}
-                key={i}
-              />
+              <Fragment key={i}>
+                <TranslatedBox
+                  block={block}
+                  pageNum={pageNum}
+                  blockNum={i}
+                  key={i}
+                />
+                {/* <div
+                  className="bg-white absolute"
+                  style={{
+                    width: `${
+                      block.transform?.width ?? block.box[2] - block.box[0]
+                    }px`,
+                    height: `${
+                      block.transform?.height ?? block.box[3] - block.box[1]
+                    }px`,
+                    left: `${block.box[0]}px`,
+                    top: `${block.box[1]}px`,
+                  }}
+                /> */}
+              </Fragment>
             ))
           : page.blocks.map(({ box, lines, font_size, vertical }, i) => (
               <SourceBox

@@ -11,6 +11,7 @@ export const sources = [
 ];
 
 export type Block = {
+  font_family?: string;
   transform?: { transform: string; width: number; height: number };
   box: number[];
   vertical: boolean;
@@ -25,4 +26,19 @@ export type OcrPage = {
   blocks: Block[];
   sorted?: boolean;
   img: string;
+};
+
+export const fontFamilies: {
+  [key: string]: { id: string; label: string; value: string };
+} = {
+  "manga-temple": {
+    id: "manga-temple",
+    label: "Manga Temple",
+    value: "Manga Temple",
+  },
+  "hey-comic": {
+    id: "hey-comic",
+    label: "Hey Comic",
+    value: "Hey Comic",
+  },
 };

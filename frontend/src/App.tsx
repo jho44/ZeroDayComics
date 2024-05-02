@@ -16,6 +16,7 @@ function App() {
     handleTextEdit,
     handleBoxDragResize,
     handleFontSizeChange,
+    handleFontFamChange,
   } = usePipeline();
 
   /* Computed */
@@ -47,6 +48,7 @@ function App() {
           handleTextEdit,
           handleBoxDragResize,
           handleFontSizeChange,
+          handleFontFamChange,
         }}
       >
         <Viewer pages={pages} />

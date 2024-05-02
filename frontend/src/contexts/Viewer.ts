@@ -30,6 +30,15 @@ interface ViewerContextType {
     blockNum: number;
     newFontSize: number;
   }) => void;
+  handleFontFamChange: ({
+    pageNum,
+    blockNum,
+    newFontFam,
+  }: {
+    pageNum: number;
+    blockNum: number;
+    newFontFam: string;
+  }) => void;
 }
 
 const ViewerContext = createContext<ViewerContextType | null>(null);

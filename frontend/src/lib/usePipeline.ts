@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { OcrPage } from "./definitions";
+import { ViewerContext } from "../contexts/Viewer";
 
 export default function usePipeline() {
   /* States */
@@ -55,6 +56,18 @@ export default function usePipeline() {
     newFontSize: number;
   }) => {
     pages[pageNum].transl_blocks[blockNum].font_size = newFontSize;
+  };
+
+  const handleFontFamChange = ({
+    pageNum,
+    blockNum,
+    newFontFam,
+  }: {
+    pageNum: number;
+    blockNum: number;
+    newFontFam: string;
+  }) => {
+    pages[pageNum].transl_blocks[blockNum].font_family = newFontFam;
   };
 
   const handleBoxDragResize = ({
@@ -130,5 +143,6 @@ export default function usePipeline() {
     handleTextEdit,
     handleBoxDragResize,
     handleFontSizeChange,
+    handleFontFamChange,
   };
 }

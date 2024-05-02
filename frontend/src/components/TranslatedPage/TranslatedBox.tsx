@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import Moveable, { OnDragEnd, OnResizeEnd } from "react-moveable";
 import { useViewer } from "../../contexts/Viewer";
-import { Block } from "../../lib/definitions";
+import { Block, fontFamilies } from "../../lib/definitions";
 import EditorToolbar from "./EditorToolbar";
 
 const parseTransform = (transform: string | undefined) => {
@@ -30,11 +30,15 @@ export default function TranslatedBox({
     handleBoxDragResize,
     handleTextEdit,
     handleFontSizeChange: saveNewFontSize,
+    handleFontFamChange: saveNewFontFam,
   } = useViewer();
 
   /* States */
   const [hovering, setHovering] = useState(false);
   const [fontSize, setFontSize] = useState(block.font_size);
+  const [fontFam, setFontFam] = useState<string>(
+    block.font_family ?? "hey-comic"
+  );
   const [popperOpen, setPopperOpen] = useState(false);
 
   /* Refs */
@@ -45,6 +49,7 @@ export default function TranslatedBox({
   const width = block.transform?.width ?? block.box[2] - block.box[0];
   const height = block.transform?.height ?? block.box[3] - block.box[1];
   const PADDING = 10;
+  const hideMoveBox = popperOpen || !hovering;
 
   /* Methods */
   const shiftTransformToParent = (e: OnDragEnd | OnResizeEnd) => {
@@ -67,13 +72,29 @@ export default function TranslatedBox({
     });
   };
 
+  const handleFontFamChange = (newFontFam: string) => {
+    setFontFam(newFontFam);
+    saveNewFontFam({ blockNum, pageNum, newFontFam });
+  };
+
   return (
     <div
       className="pointer-events-auto"
       onMouseLeave={() => setHovering(false)}
     >
       <div
-        onMouseEnter={() => setHovering(true)}
+        onMouseOver={(e) => {
+          if (
+            document
+              .getElementById(`toolbar-${pageNum}-${blockNum}`)
+              ?.contains(e.target as Node)
+          ) {
+            setHovering(false);
+            return;
+          }
+
+          setHovering(true);
+        }}
         onMouseLeave={(e) => {
           if (
             (e.relatedTarget as HTMLElement)?.classList?.contains(
@@ -95,8 +116,13 @@ export default function TranslatedBox({
         }}
       >
         <EditorToolbar
+          pageNum={pageNum}
+          blockNum={blockNum}
+          fontFam={fontFam}
           handleFontSizeChange={handleFontSizeChange}
+          handleFontFamChange={handleFontFamChange}
           hoveringOnTarget={hovering}
+          setPopperOpen={setPopperOpen}
         />
         <div
           ref={targetRef}
@@ -121,6 +147,9 @@ export default function TranslatedBox({
             contentEditable={true}
             suppressContentEditableWarning={true}
             style={{
+              // fontWeight: 700,
+              // fontStyle: "italic",
+              fontFamily: fontFamilies[fontFam].value,
               fontSize: `${fontSize}px`,
               writingMode: block.vertical
                 ? ("vertical-rl" as const)
@@ -132,7 +161,7 @@ export default function TranslatedBox({
         </div>
       </div>
       <Moveable
-        hideDefaultLines={!hovering}
+        hideDefaultLines={hideMoveBox}
         origin={false}
         ref={moveableRef}
         target={targetRef}
@@ -143,7 +172,7 @@ export default function TranslatedBox({
         keepRatio={false}
         throttleResize={1}
         renderDirections={
-          hovering ? ["nw", "n", "ne", "w", "e", "sw", "s", "se"] : []
+          hideMoveBox ? [] : ["nw", "n", "ne", "w", "e", "sw", "s", "se"]
         }
         onDragEnd={(e) => {
           if (e.target.parentElement) {
