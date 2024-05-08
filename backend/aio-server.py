@@ -4,7 +4,10 @@ import aiohttp_cors
 import re
 from loguru import logger
 
+from Tools import Tools
 from utils import pipeline, scrapers, streamRes
+
+tools = Tools()
 
 async def parse_request(request: web_request.Request):
   path = request.path
