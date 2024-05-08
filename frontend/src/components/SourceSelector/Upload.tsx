@@ -41,7 +41,9 @@ export default function Upload() {
     fetch("http://localhost:4000/files_uploaded", {
       method: "POST",
       body: formData,
-    }).then(async (res) => await handleResponse(res));
+    })
+      .then(async (res) => await handleResponse(res))
+      .catch((err) => console.error(err));
   };
 
   const convertToWebp = async (file: File) => {
