@@ -1,6 +1,13 @@
 import { useState } from "react";
 import Button from "./Button";
 import LoadingCircle from "../../LoadingCircle/LoadingCircle";
+import { ReactComponent as Check } from "../../../icons/checkmark.svg";
+
+export enum TranslationStatus {
+  DEFAULT,
+  IN_PROGRESS,
+  DONE,
+}
 
 export default function SourceBoxToolbar({
   blockNum,
@@ -21,16 +28,27 @@ export default function SourceBoxToolbar({
 }) {
   /* States */
   const [hovering, setHovering] = useState(false);
-  const [translating, setTranslating] = useState(false);
+  const [translating, setTranslating] = useState<TranslationStatus>(
+    TranslationStatus.DEFAULT
+  );
 
   /* Computed */
   const showToolbar = hoveringOnTarget || hovering;
+  const Translating = () => {
+    if (translating === TranslationStatus.IN_PROGRESS)
+      return <LoadingCircle size="1rem" thickness="2px" />;
+
+    return <Check />;
+  };
 
   /* Methods */
   const onClickTranslate = async () => {
-    setTranslating(true);
+    setTranslating(TranslationStatus.IN_PROGRESS);
     await retranslate();
-    setTranslating(false);
+    setTranslating(TranslationStatus.DONE);
+    setTimeout(() => {
+      setTranslating(TranslationStatus.DEFAULT);
+    }, 2000);
   };
 
   return (
@@ -46,8 +64,11 @@ export default function SourceBoxToolbar({
       <Button onClick={() => handleFontSizeChange(1)}>+</Button>
       <Button onClick={() => handleFontSizeChange(-1)}>-</Button>
       <Button onClick={flipTranslSrc}>ABC</Button>
-      <Button onClick={onClickTranslate} isActive={translating}>
-        {translating ? <LoadingCircle size="1rem" thickness="2px" /> : "Transl"}
+      <Button
+        onClick={onClickTranslate}
+        isActive={translating !== TranslationStatus.DEFAULT}
+      >
+        {translating ? <Translating /> : "Transl"}
       </Button>
       <input
         type="range"
