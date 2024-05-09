@@ -1,7 +1,6 @@
-import { Fragment } from "react";
+import { BoxContext } from "../../contexts/Box";
 import { OcrPage } from "../../lib/definitions";
-import TranslatedBox from "./TranslatedBox";
-import SourceBox from "./SourceBox";
+import BoxWrapper from "./BoxWrapper";
 
 type Props = {
   page: OcrPage;
@@ -13,9 +12,9 @@ type Props = {
 export default function TranslatedPage({
   page,
   pageNum,
-  translated,
   onLoadImg = () => {},
 }: Props) {
+  /* Computed */
   const src = `data:image/webp;base64,${page.img}`;
 
   return (
@@ -36,38 +35,20 @@ export default function TranslatedPage({
           height: `${page.img_height}px`,
         }}
       >
-        {translated
-          ? page.transl_blocks.map((block, i) => (
-              <Fragment key={i}>
-                <TranslatedBox
-                  block={block}
-                  pageNum={pageNum}
-                  blockNum={i}
-                  key={i}
-                />
-                {/* <div
-                  className="bg-white absolute"
-                  style={{
-                    width: `${
-                      block.transform?.width ?? block.box[2] - block.box[0]
-                    }px`,
-                    height: `${
-                      block.transform?.height ?? block.box[3] - block.box[1]
-                    }px`,
-                    left: `${block.box[0]}px`,
-                    top: `${block.box[1]}px`,
-                  }}
-                /> */}
-              </Fragment>
-            ))
-          : page.blocks.map((block, i) => (
-              <SourceBox
-                key={i}
-                {...block}
-                img_width={page.img_width}
-                boxNum={i}
-              />
-            ))}
+        {page.blocks.map((block, blockNum) => (
+          <BoxContext.Provider
+            value={{
+              imgWidth: page.img_width,
+              srcBlock: block,
+              translBlock: page.transl_blocks[blockNum],
+              blockNum,
+              pageNum,
+            }}
+            key={blockNum}
+          >
+            <BoxWrapper />
+          </BoxContext.Provider>
+        ))}
       </div>
     </div>
   );

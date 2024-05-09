@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { OcrPage } from "./definitions";
-import { ViewerContext } from "../contexts/Viewer";
 
 export default function usePipeline() {
   /* States */
@@ -27,7 +26,7 @@ export default function usePipeline() {
     ]);
   };
 
-  const handleTextEdit = ({
+  const handleTranslationChange = ({
     pageNum,
     blockNum,
     val,
@@ -44,6 +43,20 @@ export default function usePipeline() {
     // });
     pages[pageNum].transl_blocks[blockNum].lines = [val];
     // not using setPages bc don't want to rerender after every edit
+  };
+
+  const handleSrcTextEdit = ({
+    pageNum,
+    blockNum,
+    lineNum,
+    val,
+  }: {
+    pageNum: number;
+    blockNum: number;
+    lineNum: number;
+    val: string;
+  }) => {
+    pages[pageNum].blocks[blockNum].lines[lineNum] = val;
   };
 
   const handleFontSizeChange = ({
@@ -140,9 +153,10 @@ export default function usePipeline() {
     pages,
     handleSubmitUI,
     handleResponse,
-    handleTextEdit,
+    handleTranslationChange,
     handleBoxDragResize,
     handleFontSizeChange,
     handleFontFamChange,
+    handleSrcTextEdit,
   };
 }

@@ -13,10 +13,11 @@ function App() {
     pages,
     handleSubmitUI,
     handleResponse,
-    handleTextEdit,
+    handleTranslationChange,
     handleBoxDragResize,
     handleFontSizeChange,
     handleFontFamChange,
+    handleSrcTextEdit,
   } = usePipeline();
 
   /* Computed */
@@ -45,10 +46,11 @@ function App() {
 
       <ViewerContext.Provider
         value={{
-          handleTextEdit,
+          handleTranslationChange,
           handleBoxDragResize,
           handleFontSizeChange,
           handleFontFamChange,
+          handleSrcTextEdit,
         }}
       >
         <Viewer pages={pages} />

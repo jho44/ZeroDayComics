@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ReactComponent as Check } from "../../../icons/checkmark.svg";
 import { fontFamilies } from "../../../lib/definitions";
 import Button from "./Button";
@@ -49,6 +49,17 @@ const FontFamilyPopper = ({
   );
 };
 
+type Props = {
+  blockNum: number;
+  pageNum: number;
+  fontFam: string;
+  hoveringOnTarget: boolean;
+  handleFontSizeChange: (diff: number) => void;
+  handleFontFamChange: (newFontFam: string) => void;
+  setPopperOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  flipTranslSrc: () => void;
+};
+
 export default function TranslBoxToolbar({
   blockNum,
   pageNum,
@@ -57,15 +68,8 @@ export default function TranslBoxToolbar({
   handleFontSizeChange,
   handleFontFamChange,
   setPopperOpen,
-}: {
-  blockNum: number;
-  pageNum: number;
-  fontFam: string;
-  hoveringOnTarget: boolean;
-  handleFontSizeChange: (diff: number) => void;
-  handleFontFamChange: (newFontFam: string) => void;
-  setPopperOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+  flipTranslSrc,
+}: Props) {
   /* States */
   const [hovering, setHovering] = useState(false);
   const [fontFamPopperOpen, setFontFamPopperOpen] = useState(false);
@@ -108,6 +112,7 @@ export default function TranslBoxToolbar({
       </Button>
       <Button onClick={() => handleFontSizeChange(1)}>+</Button>
       <Button onClick={() => handleFontSizeChange(-1)}>-</Button>
+      <Button onClick={() => flipTranslSrc()}>Src</Button>
     </div>
   );
 }

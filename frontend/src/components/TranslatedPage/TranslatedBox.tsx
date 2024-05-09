@@ -1,19 +1,16 @@
 import { useState } from "react";
 import Moveable from "react-moveable";
+import { useBox } from "../../contexts/Box";
 import { useViewer } from "../../contexts/Viewer";
 import useMoveable from "../../hooks/useMoveable";
-import { Block, fontFamilies } from "../../lib/definitions";
+import { fontFamilies } from "../../lib/definitions";
 import EditorToolbar from "./Toolbars/TranslBoxToolbar";
 
-export default function TranslatedBox({
-  block,
-  pageNum,
-  blockNum,
-}: {
-  block: Block;
-  pageNum: number;
-  blockNum: number;
-}) {
+type Props = {
+  flipTranslSrc: () => void;
+};
+
+export default function TranslatedBox({ flipTranslSrc }: Props) {
   /* 
     Notes: WHILE resizing and dragging, will perform transforms and size changes to target itself
     on resize and drag end, apply the transforms and size changes to the parent instead
@@ -21,9 +18,11 @@ export default function TranslatedBox({
   */
 
   /* Contexts */
+  const { translBlock: block, pageNum, blockNum } = useBox();
+
   const {
     handleBoxDragResize,
-    handleTextEdit,
+    handleTranslationChange,
     handleFontSizeChange: saveNewFontSize,
     handleFontFamChange: saveNewFontFam,
   } = useViewer();
@@ -114,6 +113,7 @@ export default function TranslatedBox({
           handleFontFamChange={handleFontFamChange}
           hoveringOnTarget={hovering}
           setPopperOpen={setPopperOpen}
+          flipTranslSrc={flipTranslSrc}
         />
         <div
           ref={targetRef}
@@ -126,7 +126,7 @@ export default function TranslatedBox({
           <div
             className="text-black text-center max-w-full max-h-full outline-0"
             onBlur={(e) => {
-              handleTextEdit({
+              handleTranslationChange({
                 pageNum,
                 blockNum,
                 val: e.currentTarget.innerText,

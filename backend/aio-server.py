@@ -3,11 +3,11 @@ from aiohttp_validate import validate
 import aiohttp_cors
 
 from Tools import Tools
-from Pipeline import PipelineHandlers
+from RouteHandlers import RouteHandlers
 
 tools = Tools()
 
-pipeline = PipelineHandlers(tools)
+handlers = RouteHandlers(tools)
 
 app = web.Application()
 
@@ -23,7 +23,7 @@ routes = web.RouteTableDef()
 
 @routes.post('/files_uploaded')
 async def files_uploaded(request):
-  return await pipeline.on_files_uploaded(request)
+  return await handlers.on_files_uploaded(request)
 
 @validate(
   request_schema={
@@ -42,7 +42,11 @@ async def files_uploaded(request):
 )
 @routes.post('/source_chosen')
 async def source_chosen(request: web_request.Request):
-  return await pipeline.on_source_chosen(request)
+  return await handlers.on_source_chosen(request)
+
+@routes.post('/translate_line')
+async def translate_line(request: web_request.Request):
+  return await handlers.on_translate_line(request)
 
 app.add_routes(routes)
 

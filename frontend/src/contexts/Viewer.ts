@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react";
 
 interface ViewerContextType {
-  handleTextEdit: ({
+  handleTranslationChange: ({
     pageNum,
     blockNum,
     val,
@@ -38,6 +38,17 @@ interface ViewerContextType {
     pageNum: number;
     blockNum: number;
     newFontFam: string;
+  }) => void;
+  handleSrcTextEdit: ({
+    pageNum,
+    blockNum,
+    lineNum,
+    val,
+  }: {
+    pageNum: number;
+    blockNum: number;
+    lineNum: number;
+    val: string;
   }) => void;
 }
 

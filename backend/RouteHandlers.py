@@ -11,7 +11,7 @@ import re
 """
 init this once when start up server
 """
-class PipelineHandlers:
+class RouteHandlers:
 
   def __init__(self, tools: Tools) -> None:
     self.tools = tools
@@ -38,6 +38,11 @@ class PipelineHandlers:
     
     if path == '/files_uploaded':
       return await self.__get_files_from_req(request)
+    
+    if path == '/translate_line':
+      payload = await request.json()
+      line = payload['line']
+      return line
     
     raise Exception('Invalid route', request)
   
@@ -83,3 +88,10 @@ class PipelineHandlers:
     await self.__pipeline(imgs, resp)
     await resp.write_eof()
     return resp
+  
+  async def on_translate_line(self, request: web_request.Request, translator_type = 'deeplx'):
+    line = await self.__parse_request(request)
+    logger.info(f'Translate line {line}')
+    translation = await self.tools.translators[translator_type].translate([line])
+    return web.Response(text=translation[0])
+  
