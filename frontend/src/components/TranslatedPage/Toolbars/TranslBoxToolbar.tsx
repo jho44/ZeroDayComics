@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useState } from "react";
-import { ReactComponent as Check } from "../../icons/checkmark.svg";
-import { fontFamilies } from "../../lib/definitions";
+import { ReactComponent as Check } from "../../../icons/checkmark.svg";
+import { fontFamilies } from "../../../lib/definitions";
+import Button from "./Button";
 
 const PopperOption = ({
   content,
@@ -48,31 +49,7 @@ const FontFamilyPopper = ({
   );
 };
 
-const Button = ({
-  children,
-  onClick,
-  isActive,
-  popper,
-}: {
-  children: ReactNode;
-  onClick: (e: React.MouseEvent) => void;
-  isActive?: boolean;
-  popper?: ReactNode;
-}) => {
-  return (
-    <div className={`relative group ${isActive ? "is-active" : ""}`}>
-      <button
-        className="border-[1px] border-zinc-300 hover:bg-zinc-200 group-[.is-active]:bg-zinc-300 active:bg-zinc-300 rounded-md h-6 p-1.5 flex items-center justify-center text-nowrap"
-        onClick={onClick}
-      >
-        {children}
-      </button>
-      {popper ? <div className="popper absolute">{popper}</div> : <></>}
-    </div>
-  );
-};
-
-export default function EditorToolbar({
+export default function TranslBoxToolbar({
   blockNum,
   pageNum,
   fontFam,

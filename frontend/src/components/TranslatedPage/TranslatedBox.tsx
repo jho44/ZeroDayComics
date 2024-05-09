@@ -1,14 +1,9 @@
-import { useRef, useState } from "react";
-import Moveable, { OnDragEnd, OnResizeEnd } from "react-moveable";
+import { useState } from "react";
+import Moveable from "react-moveable";
 import { useViewer } from "../../contexts/Viewer";
+import useMoveable from "../../hooks/useMoveable";
 import { Block, fontFamilies } from "../../lib/definitions";
-import EditorToolbar from "./EditorToolbar";
-
-const parseTransform = (transform: string | undefined) => {
-  return (
-    transform?.match(/-?\d+(\.\d+)?/g)?.map((x) => parseFloat(x)) ?? [0, 0]
-  );
-};
+import EditorToolbar from "./Toolbars/TranslBoxToolbar";
 
 export default function TranslatedBox({
   block,
@@ -41,27 +36,23 @@ export default function TranslatedBox({
   );
   const [popperOpen, setPopperOpen] = useState(false);
 
-  /* Refs */
-  const targetRef = useRef<HTMLDivElement>(null);
-  const moveableRef = useRef<Moveable>(null);
+  /* Hooks */
+  const {
+    PADDING,
+    targetRef,
+    moveableRef,
+    boxWidth: width,
+    boxHeight: height,
+    handleDragEnd,
+    handleDrag,
+    handleResizeEnd,
+    handleResize,
+  } = useMoveable({ block, pageNum, blockNum, handleBoxDragResize });
 
   /* Computed */
-  const width = block.transform?.width ?? block.box[2] - block.box[0];
-  const height = block.transform?.height ?? block.box[3] - block.box[1];
-  const PADDING = 10;
   const hideMoveBox = popperOpen || !hovering;
 
   /* Methods */
-  const shiftTransformToParent = (e: OnDragEnd | OnResizeEnd) => {
-    const [pDx, pDy] = parseTransform(e.target.parentElement!.style.transform);
-    const [cDx, cDy] = parseTransform(e.target.style.transform);
-
-    const transform = `translate(${pDx + cDx}px, ${pDy + cDy}px)`;
-    e.target.parentElement!.style.transform = transform;
-    e.target.style.transform = "";
-    return transform;
-  };
-
   const handleFontSizeChange = (diff: number) => {
     setFontSize((_fontSize) => {
       const newFontSize = _fontSize + diff;
@@ -174,48 +165,10 @@ export default function TranslatedBox({
         renderDirections={
           hideMoveBox ? [] : ["nw", "n", "ne", "w", "e", "sw", "s", "se"]
         }
-        onDragEnd={(e) => {
-          if (e.target.parentElement) {
-            const transform = shiftTransformToParent(e);
-
-            handleBoxDragResize({
-              pageNum,
-              blockNum,
-              transform,
-              width,
-              height,
-            });
-          }
-        }}
-        onDrag={(e) => {
-          e.target.style.transform = e.transform;
-        }}
-        onResizeEnd={(e) => {
-          const { width: newWidthPx, height: newHeightPx } = e.target.style;
-          const newWidth = parseFloat(newWidthPx);
-          const newHeight = parseFloat(newHeightPx);
-          if (e.target.parentElement) {
-            e.target.parentElement.style.width = `${newWidth + PADDING * 2}px`;
-            e.target.parentElement.style.height = `${
-              newHeight + PADDING * 2
-            }px`;
-
-            const transform = shiftTransformToParent(e);
-
-            handleBoxDragResize({
-              pageNum,
-              blockNum,
-              transform,
-              width: newWidth,
-              height: newHeight,
-            });
-          }
-        }}
-        onResize={(e) => {
-          e.target.style.width = `${e.width}px`;
-          e.target.style.height = `${e.height}px`;
-          e.target.style.transform = e.drag.transform;
-        }}
+        onDragEnd={handleDragEnd}
+        onDrag={handleDrag}
+        onResizeEnd={handleResizeEnd}
+        onResize={handleResize}
       />
     </div>
   );
